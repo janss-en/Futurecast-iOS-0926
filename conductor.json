@@ -1,0 +1,8 @@
+{
+    "scripts": {
+        "setup": "./conductor-setup.sh",
+        "run": "xcodebuild -project Futurecast.xcodeproj -scheme Futurecast -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build",
+        "test": "xcodebuild test -project Futurecast.xcodeproj -scheme Futurecast -destination 'platform=iOS Simulator,name=iPhone 16 Pro'"
+    },
+    "runScriptMode": "nonconcurrent"
+}
