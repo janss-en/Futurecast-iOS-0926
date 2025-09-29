@@ -17,8 +17,12 @@ struct LiquidGlassControlStripView: View {
         configuration.reduceTransparencyOverride ?? reduceTransparency
     }
 
-    private var backgroundShape: some Shape {
+    private var backgroundShape: some InsettableShape {
         RoundedRectangle(cornerRadius: 20, style: .continuous)
+    }
+
+    private var glassFill: AnyShapeStyle {
+        useMatteFallback ? AnyShapeStyle(DesignTokens.Colors.graphiteElevated) : AnyShapeStyle(.ultraThinMaterial)
     }
 
     private var glassBackground: some View {
@@ -26,7 +30,7 @@ struct LiquidGlassControlStripView: View {
             .fill(.clear)
             .background(
                 backgroundShape
-                    .fill(useMatteFallback ? DesignTokens.Colors.graphiteElevated : .ultraThinMaterial)
+                    .fill(glassFill)
             )
             .overlay(
                 backgroundShape
@@ -218,4 +222,3 @@ struct ControlStripPreviewWrapper: View {
     .background(DesignTokens.Colors.graphiteBase)
     .preferredColorScheme(.dark)
 }
-
