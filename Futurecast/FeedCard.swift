@@ -54,7 +54,7 @@ struct FeedCard: View {
                 // Right rail: Vertical control stack
                 VStack {
                     Spacer()
-                    HStack {
+                    HStack(alignment: .bottom) {
                         Spacer()
                         VerticalControlStack(
                             isPlaying: visualization.isPlaying,
@@ -65,7 +65,7 @@ struct FeedCard: View {
                             onMoreTapped: onMoreTapped
                         )
                         .padding(.trailing, DesignTokens.Space.base)
-                        .padding(.bottom, DesignTokens.Space.base)
+                        .padding(.bottom, 120) // Move up to avoid caption overlap
                     }
                 }
             }
