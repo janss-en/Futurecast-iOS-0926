@@ -1,5 +1,16 @@
 import SwiftUI
 
+// MARK: - Scroll Offset Tracking
+
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+// MARK: - Home Feed View
+
 struct HomeFeedView: View {
     @State private var visualizations = Visualization.mockData
     @State private var currentIndex: Int = 0
@@ -8,6 +19,7 @@ struct HomeFeedView: View {
         dailyGoalMinutes: 15,
         streakDays: 12
     )
+    @State private var scrollOffset: CGFloat = 0
 
     var body: some View {
         GeometryReader { geometry in
@@ -16,18 +28,22 @@ struct HomeFeedView: View {
                 DesignTokens.Colors.graphiteBase
                     .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    // Momentum Strip at top
-                    MomentumStrip(data: momentumData) {
-                        // TODO: Open progress drawer
-                        print("Open progress drawer")
-                    }
-                    .padding(.horizontal, DesignTokens.Space.medium)
-                    .padding(.top, DesignTokens.Space.base)
-                    .padding(.bottom, DesignTokens.Space.small)
+                // Scrollable content with Momentum Strip inside
+                ScrollView(.vertical, showsIndicators: false) {
+                    LazyVStack(spacing: 0) {
+                        // Momentum Strip at the top of scroll content
+                        MomentumStrip(data: momentumData) {
+                            // TODO: Open progress drawer
+                            print("Open progress drawer")
+                        }
+                        .padding(.horizontal, DesignTokens.Space.medium)
+                        .padding(.top, DesignTokens.Space.base)
+                        .padding(.bottom, DesignTokens.Space.large)
+                        .opacity(momentumStripOpacity)
+                        .offset(y: momentumStripOffset)
+                        .animation(.easeOut(duration: 0.25), value: scrollOffset)
 
-                    // Scrollable card feed
-                    ScrollView(.vertical, showsIndicators: false) {
+                        // Card feed
                         LazyVStack(spacing: DesignTokens.Space.large) {
                             ForEach(visualizations) { visualization in
                                 FeedCard(
@@ -54,13 +70,57 @@ struct HomeFeedView: View {
                             }
                         }
                         .padding(.horizontal, DesignTokens.Space.medium)
-                        .padding(.bottom, 100) // Space for tab bar
+                        .background(
+                            GeometryReader { scrollGeometry in
+                                Color.clear
+                                    .preference(
+                                        key: ScrollOffsetPreferenceKey.self,
+                                        value: scrollGeometry.frame(in: .named("scroll")).minY
+                                    )
+                            }
+                        )
+
+                        Spacer(minLength: 100) // Space for tab bar
                     }
-                    .scrollTargetBehavior(.paging)
                 }
+                .coordinateSpace(name: "scroll")
+                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                    scrollOffset = value
+                }
+                .scrollTargetBehavior(.paging)
             }
         }
         .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Computed Properties
+
+    private var momentumStripOpacity: Double {
+        // Visible on initial load (scrollOffset ~ 0)
+        // Fade out as user scrolls down (scrollOffset becomes negative)
+        // Only reappear when scrolling above initial position (scrollOffset > 80)
+
+        if scrollOffset > 80 {
+            // Pull-to-reveal: fully visible when pulled down significantly
+            return 1.0
+        } else if scrollOffset > 0 {
+            // Initial state: visible
+            return 1.0
+        } else if scrollOffset > -50 {
+            // Fading out while scrolling down
+            return max(0, 1.0 + (scrollOffset / 50))
+        } else {
+            // Hidden when scrolled down
+            return 0
+        }
+    }
+
+    private var momentumStripOffset: CGFloat {
+        // Slight upward offset when fading out for smoother transition
+        if scrollOffset < 0 {
+            return min(0, scrollOffset * 0.3)
+        }
+        return 0
     }
 
     // MARK: - Actions
