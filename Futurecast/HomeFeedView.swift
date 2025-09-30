@@ -20,6 +20,7 @@ struct HomeFeedView: View {
         streakDays: 12
     )
     @State private var scrollOffset: CGFloat = 0
+    @State private var isStripDismissed: Bool = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -86,6 +87,7 @@ struct HomeFeedView: View {
                 .coordinateSpace(name: "scroll")
                 .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                     scrollOffset = value
+                    updateStripVisibility()
                 }
                 .scrollTargetBehavior(.paging)
             }
@@ -96,31 +98,50 @@ struct HomeFeedView: View {
     // MARK: - Computed Properties
 
     private var momentumStripOpacity: Double {
-        // Visible on initial load (scrollOffset ~ 0)
-        // Fade out as user scrolls down (scrollOffset becomes negative)
-        // Only reappear when scrolling above initial position (scrollOffset > 80)
-
-        if scrollOffset > 80 {
-            // Pull-to-reveal: fully visible when pulled down significantly
-            return 1.0
-        } else if scrollOffset > 0 {
-            // Initial state: visible
-            return 1.0
-        } else if scrollOffset > -50 {
-            // Fading out while scrolling down
-            return max(0, 1.0 + (scrollOffset / 50))
+        // Once dismissed, only show when pulling to reveal
+        if isStripDismissed {
+            // Pull-to-reveal: only show when user pulls down beyond threshold
+            if scrollOffset > 100 {
+                return 1.0
+            } else if scrollOffset > 50 {
+                // Gradual fade in as user pulls down
+                return (scrollOffset - 50) / 50
+            } else {
+                return 0
+            }
         } else {
-            // Hidden when scrolled down
-            return 0
+            // Initial state: visible, fade out as scrolling down
+            if scrollOffset > 0 {
+                return 1.0
+            } else if scrollOffset > -50 {
+                // Fading out while scrolling down
+                return max(0, 1.0 + (scrollOffset / 50))
+            } else {
+                return 0
+            }
         }
     }
 
     private var momentumStripOffset: CGFloat {
         // Slight upward offset when fading out for smoother transition
-        if scrollOffset < 0 {
+        if scrollOffset < 0 && !isStripDismissed {
             return min(0, scrollOffset * 0.3)
         }
         return 0
+    }
+
+    // MARK: - Helper Methods
+
+    private func updateStripVisibility() {
+        // Mark strip as dismissed once user scrolls down significantly
+        if !isStripDismissed && scrollOffset < -100 {
+            isStripDismissed = true
+        }
+
+        // Reset dismissed state when user pulls to reveal
+        if isStripDismissed && scrollOffset > 120 {
+            isStripDismissed = false
+        }
     }
 
     // MARK: - Actions
