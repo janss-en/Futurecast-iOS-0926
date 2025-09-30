@@ -7,6 +7,8 @@ struct FeedCard: View {
     let onAudioTapped: () -> Void
     let onMoreTapped: () -> Void
 
+    @StateObject private var colorLoader = ImageColorLoader()
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -25,7 +27,7 @@ struct FeedCard: View {
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .clipped()
 
-                // Bottom: Affirmation text with glass background
+                // Bottom: Affirmation text with tinted glass background
                 VStack {
                     Spacer()
 
@@ -35,14 +37,19 @@ struct FeedCard: View {
                             weight: DesignTokens.Typography.headlineWeight
                         ))
                         .lineSpacing(DesignTokens.Typography.headlineSize * (DesignTokens.Typography.headlineLineHeight - 1))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(colorLoader.textColor)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, DesignTokens.Space.large)
                         .padding(.bottom, DesignTokens.Space.extraLarge)
                         .padding(.top, DesignTokens.Space.medium)
                         .background(.clear)
-                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 0, style: .circular))
+                        .glassEffect(
+                            colorLoader.dominantColor != nil
+                                ? .regular.tint((colorLoader.dominantColor ?? .clear).opacity(0.8))
+                                : .regular,
+                            in: RoundedRectangle(cornerRadius: 0, style: .circular)
+                        )
                         .shadow(
                             color: DesignTokens.Shadow.cardShadow().color,
                             radius: DesignTokens.Shadow.cardShadow().radius,
@@ -72,6 +79,9 @@ struct FeedCard: View {
             .frame(width: geometry.size.width, height: geometry.size.height)
             .background(DesignTokens.Colors.graphiteBase)
             .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.card, style: .continuous))
+            .task {
+                await colorLoader.loadColor(from: visualization.imageURL)
+            }
         }
     }
 }
