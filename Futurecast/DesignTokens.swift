@@ -13,17 +13,46 @@ enum DesignTokens {
         static let hairlineOnDark = Color.white.opacity(0.12)
     }
 
+    enum Typography {
+        static let headlineSize: CGFloat = 24
+        static let headlineWeight: Font.Weight = .semibold
+        static let headlineLineHeight: CGFloat = 1.2
+
+        static let bodySize: CGFloat = 16
+        static let bodyWeight: Font.Weight = .regular
+        static let bodyLineHeight: CGFloat = 1.45
+
+        static let metaSize: CGFloat = 14
+        static let metaWeight: Font.Weight = .medium
+    }
+
     enum Space {
         static let base: CGFloat = 12
         static let small: CGFloat = 8
         static let medium: CGFloat = 16
         static let large: CGFloat = 24
+        static let extraLarge: CGFloat = 32
     }
 
     enum CornerRadius {
         static let surface: CGFloat = 28
+        static let card: CGFloat = 32
+        static let fab: CGFloat = 20
         static let chip: CGFloat = 18
         static let control: CGFloat = 16
+        static let button: CGFloat = 14
+    }
+
+    enum IconSize {
+        static let small: CGFloat = 18
+        static let medium: CGFloat = 24
+        static let large: CGFloat = 32
+    }
+
+    enum Shadow {
+        static func cardShadow() -> (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
+            (Color.black.opacity(0.35), 24, 2, 2)
+        }
     }
 }
 
