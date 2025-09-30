@@ -38,8 +38,8 @@ struct HomeFeedView: View {
                                     onLoopTapped: {
                                         handleLoopTapped(for: visualization.id)
                                     },
-                                    onShareTapped: {
-                                        handleShareTapped(for: visualization.id)
+                                    onAudioTapped: {
+                                        handleAudioTapped(for: visualization.id)
                                     },
                                     onMoreTapped: {
                                         handleMoreTapped(for: visualization.id)
@@ -79,10 +79,10 @@ struct HomeFeedView: View {
         }
     }
 
-    private func handleShareTapped(for id: UUID) {
+    private func handleAudioTapped(for id: UUID) {
         if let visualization = visualizations.first(where: { $0.id == id }) {
-            print("Share tapped for: \(visualization.affirmation)")
-            // TODO: Open share sheet
+            print("Audio tapped for: \(visualization.affirmation)")
+            // TODO: Toggle ambient audio or show audio settings
         }
     }
 

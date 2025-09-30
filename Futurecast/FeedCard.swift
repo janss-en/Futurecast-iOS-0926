@@ -4,7 +4,7 @@ struct FeedCard: View {
     let visualization: Visualization
     let onPlayTapped: () -> Void
     let onLoopTapped: () -> Void
-    let onShareTapped: () -> Void
+    let onAudioTapped: () -> Void
     let onMoreTapped: () -> Void
 
     var body: some View {
@@ -25,38 +25,46 @@ struct FeedCard: View {
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .clipped()
 
-                // Bottom: Control Strip (replacing the glass affirmation text)
+                // Bottom: Affirmation text with glass background
                 VStack {
                     Spacer()
 
-                    VStack(spacing: 0) {
-                        // Affirmation text above control strip
-                        Text(visualization.affirmation)
-                            .font(.system(
-                                size: DesignTokens.Typography.headlineSize,
-                                weight: DesignTokens.Typography.headlineWeight
-                            ))
-                            .lineSpacing(DesignTokens.Typography.headlineSize * (DesignTokens.Typography.headlineLineHeight - 1))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, DesignTokens.Space.large)
-                            .padding(.bottom, DesignTokens.Space.medium)
-                            .shadow(
-                                color: DesignTokens.Shadow.cardShadow().color,
-                                radius: DesignTokens.Shadow.cardShadow().radius,
-                                x: DesignTokens.Shadow.cardShadow().x,
-                                y: DesignTokens.Shadow.cardShadow().y
-                            )
-
-                        // Control strip
-                        LiquidGlassControlStripView(
-                            configuration: ControlStripConfiguration(
-                                isPlaying: visualization.isPlaying,
-                                isLooping: visualization.isLooping,
-                                isShareAvailable: true
-                            )
+                    Text(visualization.affirmation)
+                        .font(.system(
+                            size: DesignTokens.Typography.headlineSize,
+                            weight: DesignTokens.Typography.headlineWeight
+                        ))
+                        .lineSpacing(DesignTokens.Typography.headlineSize * (DesignTokens.Typography.headlineLineHeight - 1))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, DesignTokens.Space.large)
+                        .padding(.bottom, DesignTokens.Space.extraLarge)
+                        .padding(.top, DesignTokens.Space.medium)
+                        .background(.clear)
+                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 0, style: .circular))
+                        .shadow(
+                            color: DesignTokens.Shadow.cardShadow().color,
+                            radius: DesignTokens.Shadow.cardShadow().radius,
+                            x: DesignTokens.Shadow.cardShadow().x,
+                            y: DesignTokens.Shadow.cardShadow().y
                         )
+                }
+
+                // Right rail: Vertical control stack
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        VerticalControlStack(
+                            isPlaying: visualization.isPlaying,
+                            isLooping: visualization.isLooping,
+                            onPlayTapped: onPlayTapped,
+                            onLoopTapped: onLoopTapped,
+                            onAudioTapped: onAudioTapped,
+                            onMoreTapped: onMoreTapped
+                        )
+                        .padding(.trailing, DesignTokens.Space.base)
                         .padding(.bottom, DesignTokens.Space.base)
                     }
                 }
@@ -77,7 +85,7 @@ struct FeedCard: View {
             visualization: Visualization.mockData[0],
             onPlayTapped: {},
             onLoopTapped: {},
-            onShareTapped: {},
+            onAudioTapped: {},
             onMoreTapped: {}
         )
         .frame(height: 650)
